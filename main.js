@@ -1,40 +1,42 @@
-
-
-// Función para mostrar un mensaje de bienvenida
+ // Función para mostrar un mensaje de bienvenida
 function mostrarBienvenida() {
     return new Promise((resolve) => {
-        alert(`¡Bienvenid@ a Apple World!\n\nSomos el presente creando el futuro. Presiona aceptar para tener acceso a todo lo nuevo y lo que está por venir.`);
+    
+    const localStorageNombre = localStorage.getItem("nombre")
+    if (!localStorageNombre) {
+    alert(`¡Bienvenid@ a Apple World!\n\nSomos el presente creando el futuro. Presiona aceptar para tener acceso a todo lo nuevo y lo que está por venir.`);
         resolve();
+    }
     });
-}
+} 
 
 // Función para obtener el nombre del usuario
 function obtenerNombre() {
-    return new Promise((resolve) => {
-        const nombre = prompt("Ingrese su nombre.");
 
-        if (nombre !== null && nombre !== "") {
-            alert(`Hola ${nombre}, estamos felices de que estés aquí con nosotros.`);
-            localStorage.setItem('nombre', nombre);
-            resolve(nombre);
+    let nombre;
+
+        const nombreStorage = localStorage.getItem("nombre");
+        if (nombreStorage) {
+            nombre = nombreStorage;
+            return alert(`Bienvenid@ nuevamente ${nombre.toUpperCase()}`);
         } else {
-            alert("Por favor, ingrese un nombre válido.");
-            obtenerNombre().then(resolve);
+            nombre  = prompt("Ingrese su nombre.");
+        localStorage.setItem("nombre", `${nombre}` );
+        return alert (`Hola ${nombre}, estamos felices de que estés aquí con nosotros.`)
         }
-    });
-}
-
+    }
+/* 
 // Función para mostrar el mensaje de asesoramiento
 function mostrarAsesoramiento() {
     for (let asesor = 1; asesor <= 3; asesor++) {
-        const nombreCliente = prompt("Vuelva a ingresar su nombre y se le asignará un asesor.");
+        const nombreCliente = prompt("Ingrese si y se le asignará un asesor.");
         if (nombreCliente !== null) {
             alert(`${nombreCliente}, su asesor es ${asesor}.`);
         } else {
             break; // Salir del bucle si el usuario presiona "Cancelar"
         }
     }
-}
+}  */
 
 // Función para elegir la categoría (MacBook o iPhone)
 function elegirCategoria() {
@@ -42,7 +44,7 @@ function elegirCategoria() {
         let categoria = "";
 
         while (categoria !== "1" && categoria !== "2") {
-            categoria = prompt("Ingrese '1' para ver MacBooks o '2' para ver iPhones").toLowerCase();
+            categoria = prompt("Ingrese '1' para ver MacBooks o '2' para ver iPhones");
 
             if (categoria === "1") {
                 elegirMacBook().then(resolve);
@@ -54,6 +56,7 @@ function elegirCategoria() {
                 resolve(); // Resolver la promesa si el usuario presiona "Cancelar"
             }
         }
+        localStorage.setItem('categoria', categoria);
     });
 }
 
@@ -79,17 +82,15 @@ function elegirMacBook() {
             } else {
                 resolve(); // Resolver la promesa si el usuario presiona "Cancelar"
             }
+            localStorage.setItem('eleccion', macbookElegido);
         }
-        // Almacenar elección en localStorage
-        localStorage.setItem('categoria', 'MacBook');
-        localStorage.setItem('eleccion', macbookElegido);
     });
 }
 
 // Función para elegir un iPhone
 function elegiriPhone() {
     return new Promise((resolve) => {
-        let iphoneElegido = "";
+        let iphoneElegido;
 
         while (iphoneElegido !== "1" && iphoneElegido !== "2" && iphoneElegido !== "3") {
             iphoneElegido = prompt("Seleccione su iPhone: Ingrese 1 para 'iPhone 14', 2 para 'iPhone 14 Pro' o 3 para 'iPhone 14 Pro Max'").toLowerCase();
@@ -108,10 +109,8 @@ function elegiriPhone() {
             } else {
                 resolve(); // Resolver la promesa si el usuario presiona "Cancelar"
             }
+            localStorage.setItem('eleccion', iphoneElegido); 
         }
-        // Almacenar elección en localStorage
-        localStorage.setItem('categoria', 'iPhone');
-        localStorage.setItem('eleccion', iphoneElegido);
     });
 }
 
@@ -125,18 +124,27 @@ function mostrarEleccion() {
     }
 }
 
-// Función para cargar información adicional desde un servidor ficticio
-function cargarInformacionAdicional() {
+// Función para traer la informacion de una api
+function traemosLaApi() {
     return new Promise((resolve) => {
-        // Simulación de una solicitud Fetch a un servidor ficticio
-        fetch('https://api.ejemplo.com/informacion-adicional')
-            .then(response => response.json())
-            .then(data => {
-                alert(`Información adicional: ${data.descripcion}`);
+        fetch("https://651ca2c635bd4107e3730171.mockapi.io/phoneapi/v1/productos")
+            .then((response) => response.json())
+            .then((data) => {
+                data.forEach((item) => {
+                    let div = document.createElement("div");
+                    div.innerHTML = `
+                    <h2>ID: ${item.id}<h2/>
+                    <p>Nombre: ${item.nombre}<p/>
+                    `;
+
+                    document.body.append(div);
+                });
+                console.log("🚀 ~ file: main.js:133 ~ returnnewPromise ~ data:", data)                
+                // alert(`Información adicional: ${data}`);
                 resolve();
             })
             .catch(error => {
-                console.error('Error al cargar información adicional:', error);
+              //  console.error('Error al cargar información adicional:', error);
                 resolve(); // Resolver la promesa incluso si hay un error
             });
     });
@@ -144,11 +152,11 @@ function cargarInformacionAdicional() {
 
 // Llamamos a las funciones en el orden adecuado utilizando promesas
 mostrarBienvenida()
-    .then(obtenerNombre)
-    .then(mostrarAsesoramiento)
-    .then(elegirCategoria)
-    .then(cargarInformacionAdicional)
-    .then(mostrarEleccion)
+    .then(obtenerNombre())
+//   .then(mostrarAsesoramiento())
+    .then(elegirCategoria())
+    .then(traemosLaApi())
+    .then(mostrarEleccion())
     .catch(error => {
         console.error('Error en la aplicación:', error);
-    });
+    }); 
